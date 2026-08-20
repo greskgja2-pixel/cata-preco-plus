@@ -29,3 +29,9 @@ test('conclusão usa mensagem em português e preserva o estado Concluído', () 
   assert.match(html, /A pesquisa terminou sem encontrar produtos válidos/);
   assert.match(html, /else if\(ui\.state\.dataset\.state==='running'\)/);
 });
+
+test('interface distingue login obrigatório de pesquisa vazia', () => {
+  assert.match(html, /login_required/);
+  assert.match(html, /Login necessário/);
+  assert.match(html, /event\.diagnostic/);
+});
