@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
       headless: true
     });
     const result = await crawl({ browser, startUrl: url.href, supplier, emit, signal: controller.signal });
-    emit({ type: 'final', ...result, products: result.products.map(({ _url, ...product }) => product), percent: ['completed', 'no_results'].includes(result.status) ? 100 : undefined });
+    emit({ type: 'final', ...result, products: result.products.map(({ _url, ...product }) => product), percent: ['completed', 'no_results', 'login_required'].includes(result.status) ? 100 : undefined });
   } catch (error) {
     const cancelled = controller.signal.aborted;
     emit({ type: cancelled ? 'cancelled' : 'error', status: cancelled ? 'Pesquisa cancelada. Os itens já recebidos foram preservados.' : error.message });
