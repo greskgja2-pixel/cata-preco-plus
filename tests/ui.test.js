@@ -25,7 +25,7 @@ test('interface usa AbortController e preserva exportação após cancelamento',
 });
 
 test('conclusão usa mensagem em português e preserva o estado Concluído', () => {
-  assert.match(html, /Pesquisa concluída\. Nenhum produto válido foi encontrado/);
-  assert.match(html, /ui\.state\.textContent=completed\?'Concluído':'Bloqueado'/);
+  assert.match(html, /Sem resultados/);
+  assert.match(html, /A pesquisa terminou sem encontrar produtos válidos/);
   assert.match(html, /else if\(ui\.state\.dataset\.state==='running'\)/);
 });

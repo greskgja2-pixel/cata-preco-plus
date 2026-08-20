@@ -19,3 +19,8 @@ test('crawler fica no mesmo domínio', () => {
   assert.equal(sameOrigin('/produto/1', 'https://example.com'), true);
   assert.equal(sameOrigin('https://evil.example/produto/1', 'https://example.com'), false);
 });
+
+test('traduz falha de DNS para mensagem compreensível', async () => {
+  const lookup = async () => { const error = new Error('busy'); error.code = 'ENOTFOUND'; throw error; };
+  await assert.rejects(() => validatePublicUrl('https://inexistente.example', lookup), /Não foi possível localizar o domínio/);
+});
