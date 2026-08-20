@@ -36,3 +36,13 @@ test('não salva página de categoria sem evidência de produto e preço', () =>
 test('produto sem preço obrigatório não é exportado como sucesso', () => {
   assert.equal(parseSnapshot({ url: 'https://loja.example/produto/cabo', jsonLd: [], meta: { title: 'Cabo' }, h1: 'Cabo' }, 'Fornecedor'), null);
 });
+
+test('aceita preço semântico vindo do atributo content de meta', () => {
+  const product = parseSnapshot({
+    url: 'https://loja.example/cabo-hdmi', jsonLd: [], h1: 'Cabo HDMI',
+    meta: { price: '449.00', image: 'https://loja.example/cabo.webp' },
+    hasBuyButton: true, priceCount: 6, breadcrumb: 'Início > Cabos'
+  }, 'Fornecedor');
+  assert.equal(product['Custo do Produto'], 449);
+  assert.equal(product['Nome do Produto'], 'Cabo HDMI');
+});
