@@ -1,12 +1,18 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { BLOCKED_RE, scoreLink, uniqueLinks } = require('../lib/crawler');
+const { BLOCKED_RE, LOGIN_REQUIRED_RE, scoreLink, uniqueLinks } = require('../lib/crawler');
 
 test('detecta CAPTCHA e bloqueios em português e inglês', () => {
   assert.match('Verify you are human', BLOCKED_RE);
   assert.match('Resolva o CAPTCHA', BLOCKED_RE);
   assert.match('Acesso negado', BLOCKED_RE);
+});
+
+test('detecta fornecedor que esconde preço até autenticação', () => {
+  assert.match('Identifique-se para ver preço', LOGIN_REQUIRED_RE);
+  assert.match('R$ ***', LOGIN_REQUIRED_RE);
+  assert.doesNotMatch('R$ 149,90', LOGIN_REQUIRED_RE);
 });
 
 test('deduplica links, remove rastreamento e rejeita outro domínio', () => {
