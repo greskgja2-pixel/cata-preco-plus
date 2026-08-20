@@ -1,0 +1,14 @@
+'use strict';
+const express = require('express');
+const path = require('node:path');
+const scrape = require('./api/scrape');
+const exportXlsx = require('./api/export');
+const app = express();
+app.use(express.json({ limit: '4mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.post('/api/scrape', scrape);
+app.post('/api/export', exportXlsx);
+app.use((_req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
+const port = Number(process.env.PORT || 3000);
+if (require.main === module) app.listen(port, () => process.stdout.write(`Cata Preço+ em http://localhost:${port}\n`));
+module.exports = app;
