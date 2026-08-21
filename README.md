@@ -52,7 +52,7 @@ Não descreva uma versão como pronta apenas porque o ZIP abre ou os testes unit
 - Estado de CAPTCHA/bloqueio testado e nunca exibido como concluído.
 - Página de categoria não exportada como produto.
 - Produto sem preço não contado como sucesso.
-- Exportações XLSX e JSON abertas e conferidas com as sete colunas exatas.
+- Exportações XLSX e JSON abertas e conferidas com as oito colunas exatas, incluindo o link direto do produto.
 - Deploy de prévia da Vercel testado antes de promover para produção.
 - Scraping real testado separadamente em cada fornecedor suportado; aprovação em HTML simulado não substitui o teste ao vivo.
 
@@ -62,14 +62,15 @@ Se qualquer item não puder ser executado, a entrega deve dizer **não validado*
 
 - `public/index.html`: painel e ponte de comunicação com a extensão.
 - `extension/`: extensão Chrome Manifest V3, coletor DOM e fila persistente.
-- `public/downloads/coletor-cata-preco-plus-v1.2.0.zip`: pacote instalável gerado por `npm run build:extension`.
+- `public/downloads/coletor-cata-preco-plus-v1.3.0.zip`: pacote instalável gerado por `npm run build:extension`.
 
-## Versão 1.2.0
+## Versão 1.3.0
 
 - Captura imagens por `src`, `currentSrc`, `srcset` e atributos comuns de lazy-load.
 - Exibe a miniatura do produto no catálogo e mantém o link original nas exportações.
 - Abre e navega a aba coletora sem ativá-la, preservando a aba que o usuário está usando.
-- O botão **Ver aba** continua disponível para login ou CAPTCHA.
+- Cataloga e exporta o link direto de cada produto.
+- Remove o botão **Ver aba**; a aba do fornecedor pode ser aberta manualmente quando houver login ou CAPTCHA.
 - `api/export.js`: exportação XLSX segura com ExcelJS.
 - `tests/`: regressões do painel, extensão, preços, CAPTCHA, fila e exportação.
 

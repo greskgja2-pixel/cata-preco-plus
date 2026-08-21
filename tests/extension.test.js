@@ -35,10 +35,16 @@ test('coletor rola, lê JSON-LD, cards, preços e bloqueios', () => {
 test('serviço coleta em aba não ativa e nunca fecha CAPTCHA automaticamente', () => {
   assert.match(worker, /chrome\.tabs\.create\(\{ url: start\.href, active: false \}\)/);
   assert.match(worker, /chrome\.tabs\.update\(activeJob\.collectorTabId, \{ url: current\.url, active: false \}\)/);
-  assert.match(worker, /message\.type === 'FOCUS'/);
+  assert.doesNotMatch(worker, /message\.type === 'FOCUS'/);
+  assert.doesNotMatch(worker, /active: true/);
   assert.match(worker, /activeJob\.queue\.unshift\(current\)/);
   assert.match(worker, /CAPTCHA detectado/);
   assert.doesNotMatch(worker, /chrome\.tabs\.remove/);
+});
+
+test('produto coletado inclui o link direto público', () => {
+  assert.match(worker, /'Link do Produto': raw\.url/);
+  assert.match(worker, /'Link da Imagem': raw\.image/);
 });
 
 test('coletor captura fontes de imagem normais e lazy-loaded', () => {

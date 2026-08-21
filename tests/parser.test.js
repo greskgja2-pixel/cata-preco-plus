@@ -16,7 +16,7 @@ test('classifica embalagem por conteúdo', () => {
   assert.equal(packagingType('Mouse sem fio', 'Venda por unidade'), 'Unidade');
 });
 
-test('extrai Product JSON-LD e mantém as sete colunas', () => {
+test('extrai Product JSON-LD e mantém as oito colunas', () => {
   const product = parseSnapshot({
     url: 'https://loja.example/produto/cabo',
     jsonLd: [JSON.stringify({ '@type': 'Product', name: 'Cabo HDMI', description: 'Kit 2 peças', category: 'Cabos', image: '/cabo.webp', offers: { price: '19.90' } })],
@@ -26,7 +26,8 @@ test('extrai Product JSON-LD e mantém as sete colunas', () => {
   assert.equal(product['Custo do Produto'], 19.9);
   assert.equal(product['Tipo de Embalagem'], 'Caixa Fechada');
   assert.equal(product['Link da Imagem'], 'https://loja.example/cabo.webp');
-  assert.equal(Object.keys(product).filter(key => !key.startsWith('_')).length, 7);
+  assert.equal(product['Link do Produto'], 'https://loja.example/produto/cabo');
+  assert.equal(Object.keys(product).filter(key => !key.startsWith('_')).length, 8);
 });
 
 test('não salva página de categoria sem evidência de produto e preço', () => {
@@ -57,4 +58,5 @@ test('extrai card público da listagem da MS Atacado sem confundir o código com
   assert.equal(product['Nome do Produto'], 'TANQUE NAVE');
   assert.equal(product['Custo do Produto'], 35);
   assert.equal(product['Categoria do Produto'], 'BRINQUEDOS');
+  assert.equal(product['Link do Produto'], 'https://www.msatacado.com.br/1548-TANQUE-NAVE');
 });

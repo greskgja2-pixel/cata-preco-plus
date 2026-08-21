@@ -7,9 +7,15 @@ const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
 
 test('interface contém todos os controles obrigatórios', () => {
-  for (const id of ['supplier', 'url', 'start', 'cancel', 'pause', 'resume', 'focusTab', 'collector', 'bar', 'status', 'pages', 'count', 'elapsed', 'xlsx', 'json']) {
+  for (const id of ['supplier', 'url', 'start', 'cancel', 'pause', 'resume', 'collector', 'bar', 'status', 'pages', 'count', 'elapsed', 'xlsx', 'json']) {
     assert.match(html, new RegExp(`id=["']${id}["']`));
   }
+});
+
+test('interface não contém o botão Ver aba', () => {
+  assert.doesNotMatch(html, /id=["']focusTab["']/);
+  assert.doesNotMatch(html, />Ver aba</);
+  assert.doesNotMatch(html, /command\('FOCUS'\)/);
 });
 
 test('JavaScript embutido compila', () => {
@@ -43,7 +49,7 @@ test('interface completa HTTPS automaticamente', () => {
   assert.match(html, /https:\/\//);
 });
 test('interface exige o coletor e oferece download e controles de CAPTCHA', () => {
-  assert.match(html, /coletor-cata-preco-plus-v1\.2\.0\.zip/);
+  assert.match(html, /coletor-cata-preco-plus-v1\.3\.0\.zip/);
   assert.match(html, /Coletor não conectado/);
   assert.match(html, /Pausar/);
   assert.match(html, /Continuar/);
@@ -55,5 +61,11 @@ test('interface mostra miniaturas clicáveis e informa coleta em segundo plano',
   assert.match(html, /p\['Link da Imagem'\]/);
   assert.match(html, /loading="lazy"/);
   assert.match(html, /em segundo plano/);
-  assert.match(html, /requiredVersion='1\.2\.0'/);
+  assert.match(html, /requiredVersion='1\.3\.0'/);
+});
+
+test('interface mostra e exporta o link direto do produto', () => {
+  assert.match(html, /p\['Link do Produto'\]/);
+  assert.match(html, />Abrir produto</);
+  assert.match(html, /<th>Link<\/th>/);
 });

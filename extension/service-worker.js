@@ -37,6 +37,7 @@ function publicProduct(raw, job) {
     'Descrição do Produto': clean(raw.description || ''),
     'Tipo de Embalagem': bulk ? 'Caixa Fechada' : 'Unidade',
     'Link da Imagem': raw.image || '',
+    'Link do Produto': raw.url || '',
     _url: raw.url
   };
 }
@@ -140,7 +141,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'PAUSE') { activeJob.paused = true; activeJob.pauseReason = 'manual'; await chrome.storage.local.set({ activeJob }); await sendPanel({ type: 'paused', reason: 'manual', status: 'Pesquisa pausada.', pages: activeJob.pages, products: activeJob.products.length }); return { ok: true }; }
     if (message.type === 'RESUME') { const recovering = activeJob.pauseReason === 'recovery'; activeJob.paused = false; activeJob.pauseReason = ''; await chrome.storage.local.set({ activeJob }); await sendPanel({ type: 'resumed', status: 'Pesquisa retomada.', pages: activeJob.pages, products: activeJob.products.length }); if (recovering) runJob().catch(async error => { await sendPanel({ type: 'error', status: error.message }); activeJob = null; await chrome.storage.local.remove('activeJob'); }); return { ok: true }; }
     if (message.type === 'CANCEL') { activeJob.cancelled = true; activeJob.paused = false; return { ok: true }; }
-    if (message.type === 'FOCUS') { await chrome.tabs.update(activeJob.collectorTabId, { active: true }); if (sender.tab?.windowId) await chrome.windows.update(sender.tab.windowId, { focused: true }).catch(() => {}); return { ok: true }; }
     throw new Error('Comando desconhecido.');
   })().then(sendResponse).catch(error => sendResponse({ ok: false, error: error.message }));
   return true;
