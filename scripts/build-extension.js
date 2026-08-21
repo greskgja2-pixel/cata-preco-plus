@@ -7,7 +7,7 @@ const archiver = require('archiver');
 const root = path.join(__dirname, '..');
 const source = path.join(root, 'extension');
 const outputDir = path.join(root, 'public', 'downloads');
-const outputPath = path.join(outputDir, 'coletor-cata-preco-plus-v1.2.0.zip');
+const outputPath = path.join(outputDir, 'coletor-cata-preco-plus-v1.3.0.zip');
 
 if (!fs.existsSync(path.join(source, 'manifest.json'))) throw new Error('manifest.json da extensão não encontrado.');
 fs.mkdirSync(outputDir, { recursive: true });
