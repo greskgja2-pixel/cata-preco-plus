@@ -30,7 +30,26 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
 const absolute = value => { try { return new URL(value, location.href).href; } catch { return ''; } };
 const money = text => clean(text).match(/R\$\s*\d{1,3}(?:\.\d{3})*(?:,\d{2})|R\$\s*\d+(?:[.,]\d{2})?/i)?.[0] || '';
-const imageUrl = element => absolute(element?.currentSrc || element?.dataset?.src || element?.dataset?.lazySrc || element?.src || '');
+const imageUrl = element => {
+  if (!element) return '';
+  const srcset = element.getAttribute?.('srcset') || element.dataset?.srcset || '';
+  const srcsetCandidate = srcset.split(',').map(item => item.trim().split(/\s+/)[0]).filter(Boolean).pop();
+  const candidates = [
+    element.currentSrc,
+    srcsetCandidate,
+    element.dataset?.src,
+    element.dataset?.lazySrc,
+    element.dataset?.original,
+    element.getAttribute?.('data-lazy'),
+    element.getAttribute?.('data-original'),
+    element.src
+  ];
+  for (const candidate of candidates) {
+    const url = absolute(candidate);
+    if (url && !/placeholder|loading|spinner|transparent|blank\.(?:png|gif)/i.test(url)) return url;
+  }
+  return '';
+};
 const isProductUrl = value => { try { return /\/products?\/|\/produto\/|\/p\/|\/\d{3,}-[a-z\d]/i.test(new URL(value, location.href).pathname); } catch { return false; } };
 const isCategoryUrl = value => { try { return /\/t\/produtos|\/categor(?:y|ia)|\/collections?|\/cole(?:cao|coes|ção|ções)|\/departamentos?|\/\d{1,2}-[a-z\d]/i.test(new URL(value, location.href).pathname); } catch { return false; } };
 

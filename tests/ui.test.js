@@ -43,9 +43,17 @@ test('interface completa HTTPS automaticamente', () => {
   assert.match(html, /https:\/\//);
 });
 test('interface exige o coletor e oferece download e controles de CAPTCHA', () => {
-  assert.match(html, /coletor-cata-preco-plus\.zip/);
+  assert.match(html, /coletor-cata-preco-plus-v1\.2\.0\.zip/);
   assert.match(html, /Coletor não conectado/);
   assert.match(html, /Pausar/);
   assert.match(html, /Continuar/);
   assert.match(html, /CAPTCHA/);
+});
+
+test('interface mostra miniaturas clicáveis e informa coleta em segundo plano', () => {
+  assert.match(html, /class="product-thumb"/);
+  assert.match(html, /p\['Link da Imagem'\]/);
+  assert.match(html, /loading="lazy"/);
+  assert.match(html, /em segundo plano/);
+  assert.match(html, /requiredVersion='1\.2\.0'/);
 });
