@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { isPrivateIp, validatePublicUrl, sameOrigin } = require('../lib/security');
+const { isPrivateIp, normalizeUrlInput, validatePublicUrl, sameOrigin } = require('../lib/security');
 
 test('bloqueia endereços locais e privados', () => {
   for (const ip of ['127.0.0.1', '10.0.0.1', '172.16.0.1', '192.168.1.1', '169.254.1.1', '::1']) assert.equal(isPrivateIp(ip), true);
@@ -23,4 +23,10 @@ test('crawler fica no mesmo domínio', () => {
 test('traduz falha de DNS para mensagem compreensível', async () => {
   const lookup = async () => { const error = new Error('busy'); error.code = 'ENOTFOUND'; throw error; };
   await assert.rejects(() => validatePublicUrl('https://inexistente.example', lookup), /Não foi possível localizar o domínio/);
+});
+
+test('adiciona HTTPS automaticamente quando o protocolo não foi digitado', () => {
+  assert.equal(normalizeUrlInput('msatacado.com.br'), 'https://msatacado.com.br');
+  assert.equal(normalizeUrlInput('www.msatacado.com.br/14-BRINQUEDOS'), 'https://www.msatacado.com.br/14-BRINQUEDOS');
+  assert.equal(normalizeUrlInput('http://example.com'), 'http://example.com');
 });

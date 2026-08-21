@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseMoney, packagingType, parseSnapshot } = require('../lib/parser');
+const { parseMoney, packagingType, parseSnapshot, parseListingCard } = require('../lib/parser');
 
 test('converte preços brasileiros sem capturar símbolos isolados', () => {
   assert.equal(parseMoney('R$ 1.234,56'), 1234.56);
@@ -45,4 +45,16 @@ test('aceita preço semântico vindo do atributo content de meta', () => {
   }, 'Fornecedor');
   assert.equal(product['Custo do Produto'], 449);
   assert.equal(product['Nome do Produto'], 'Cabo HDMI');
+});
+
+test('extrai card público da listagem da MS Atacado sem confundir o código com o nome', () => {
+  const product = parseListingCard({
+    url: 'https://www.msatacado.com.br/1548-TANQUE-NAVE',
+    name: 'Cód.: WM509513 TANQUE NAVE', price: 'R$ 35,00',
+    description: 'Cód.: WM509513 TANQUE NAVE R$ 35,00',
+    image: 'https://www.msatacado.com.br/tanque.webp'
+  }, 'MS Atacado', 'BRINQUEDOS');
+  assert.equal(product['Nome do Produto'], 'TANQUE NAVE');
+  assert.equal(product['Custo do Produto'], 35);
+  assert.equal(product['Categoria do Produto'], 'BRINQUEDOS');
 });

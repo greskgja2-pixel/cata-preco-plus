@@ -35,3 +35,9 @@ test('interface distingue login obrigatório de pesquisa vazia', () => {
   assert.match(html, /Login necessário/);
   assert.match(html, /event\.diagnostic/);
 });
+
+test('interface completa HTTPS automaticamente', () => {
+  assert.match(html, /const normalizeUrl=/);
+  assert.match(html, /ui\.url\.addEventListener\('blur'/);
+  assert.match(html, /https:\/\//);
+});
