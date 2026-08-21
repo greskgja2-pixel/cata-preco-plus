@@ -1,4 +1,4 @@
-# Relatório de validação — Cata Preço+ 1.1.0 híbrido
+# Relatório de validação — Cata Preço+ 1.2.0 híbrido
 
 Data: 21/08/2026
 
@@ -8,7 +8,11 @@ Data: 21/08/2026
 
 ## Aprovado
 
-- 33/33 testes automatizados.
+- 35/35 testes automatizados.
+- Captura de imagens normais, responsivas (`srcset`) e carregadas sob demanda.
+- Miniaturas clicáveis no catálogo, com fallback visual para imagem indisponível.
+- Criação e navegação da aba coletora com `active: false`.
+- Abertura da aba somente por ação explícita em **Ver aba**.
 - Sintaxe aprovada para painel, APIs, content script, service worker e build.
 - ZIP íntegro com `manifest.json`, `content.js`, `service-worker.js` e `popup.html` na raiz.
 - O painel não chama mais `/api/scrape`; “Iniciar” permanece bloqueado sem o coletor.

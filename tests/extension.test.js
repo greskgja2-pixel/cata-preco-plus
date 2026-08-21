@@ -32,11 +32,21 @@ test('coletor rola, lê JSON-LD, cards, preços e bloqueios', () => {
   assert.doesNotMatch(content, /money\(main\?\.innerText/);
 });
 
-test('serviço abre aba visível e nunca fecha CAPTCHA automaticamente', () => {
-  assert.match(worker, /chrome\.tabs\.create\(\{ url: start\.href, active: true \}\)/);
+test('serviço coleta em aba não ativa e nunca fecha CAPTCHA automaticamente', () => {
+  assert.match(worker, /chrome\.tabs\.create\(\{ url: start\.href, active: false \}\)/);
+  assert.match(worker, /chrome\.tabs\.update\(activeJob\.collectorTabId, \{ url: current\.url, active: false \}\)/);
+  assert.match(worker, /message\.type === 'FOCUS'/);
   assert.match(worker, /activeJob\.queue\.unshift\(current\)/);
   assert.match(worker, /CAPTCHA detectado/);
   assert.doesNotMatch(worker, /chrome\.tabs\.remove/);
+});
+
+test('coletor captura fontes de imagem normais e lazy-loaded', () => {
+  assert.match(content, /currentSrc/);
+  assert.match(content, /srcset/);
+  assert.match(content, /data-original/);
+  assert.match(content, /data-lazy/);
+  assert.match(content, /placeholder\|loading\|spinner/);
 });
 
 test('fila persiste e oferece pausa, retomada e cancelamento', () => {

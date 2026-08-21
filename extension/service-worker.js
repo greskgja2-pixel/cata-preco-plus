@@ -75,7 +75,7 @@ async function runJob() {
     activeJob.currentCategory = current.category || '';
     await sendPanel({ type: 'progress', status: `Abrindo ${current.url}`, pages: activeJob.pages, products: activeJob.products.length, percent: Math.min(95, Math.round(activeJob.pages / activeJob.maxPages * 100)) });
     try {
-      await chrome.tabs.update(activeJob.collectorTabId, { url: current.url, active: true });
+      await chrome.tabs.update(activeJob.collectorTabId, { url: current.url, active: false });
       const result = await collectCurrentPage();
       if (!result?.ok) throw new Error(result?.error || 'A página não respondeu ao coletor.');
       if (activeJob.pages === 1 && result.url) activeJob.origin = new URL(result.url).origin;
@@ -130,7 +130,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const start = normalizeUrl(message.url);
       const supplier = clean(message.supplier);
       if (supplier.length < 2) throw new Error('Informe o nome do fornecedor.');
-      const collector = await chrome.tabs.create({ url: start.href, active: true });
+      const collector = await chrome.tabs.create({ url: start.href, active: false });
       activeJob = { id: crypto.randomUUID(), panelTabId: sender.tab.id, collectorTabId: collector.id, supplier, origin: start.origin, queue: [{ url: start.href, category: '' }], queued: [start.href], visited: [], productUrls: [], products: [], pages: 0, maxPages: 180, maxProducts: 2500, paused: false, pauseReason: '', cancelled: false, startedAt: Date.now() };
       await chrome.storage.local.set({ activeJob });
       runJob().catch(async error => { await sendPanel({ type: 'error', status: error.message }); activeJob = null; await chrome.storage.local.remove('activeJob'); });

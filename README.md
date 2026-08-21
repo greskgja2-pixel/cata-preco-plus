@@ -62,7 +62,14 @@ Se qualquer item não puder ser executado, a entrega deve dizer **não validado*
 
 - `public/index.html`: painel e ponte de comunicação com a extensão.
 - `extension/`: extensão Chrome Manifest V3, coletor DOM e fila persistente.
-- `public/downloads/coletor-cata-preco-plus.zip`: pacote instalável gerado por `npm run build:extension`.
+- `public/downloads/coletor-cata-preco-plus-v1.2.0.zip`: pacote instalável gerado por `npm run build:extension`.
+
+## Versão 1.2.0
+
+- Captura imagens por `src`, `currentSrc`, `srcset` e atributos comuns de lazy-load.
+- Exibe a miniatura do produto no catálogo e mantém o link original nas exportações.
+- Abre e navega a aba coletora sem ativá-la, preservando a aba que o usuário está usando.
+- O botão **Ver aba** continua disponível para login ou CAPTCHA.
 - `api/export.js`: exportação XLSX segura com ExcelJS.
 - `tests/`: regressões do painel, extensão, preços, CAPTCHA, fila e exportação.
 
