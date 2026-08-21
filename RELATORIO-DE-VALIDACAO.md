@@ -1,53 +1,32 @@
-# Relatório de validação — Cata Preço+ 1.0.0
+# Relatório de validação — Cata Preço+ 1.1.0 híbrido
 
-Data: 20/08/2026
+Data: 21/08/2026
 
-## Resultado atual
+## Status
 
-**Status: candidato de teste; publicação em produção bloqueada.**
-
-O código, o servidor local, os módulos, a exportação e a auditoria de dependências foram validados. A execução visual completa e uma pesquisa ao vivo numa Preview Deployment da Vercel não puderam ser executadas neste ambiente. Portanto, este pacote não deve ser descrito como “100% funcionando” até concluir os testes pendentes.
+**Candidato de prévia. Produção bloqueada até validar a extensão carregada em um Chrome com suporte a extensões.**
 
 ## Aprovado
 
-- 15/15 testes automatizados.
-- Todos os arquivos JavaScript passam em `node --check`.
-- Servidor Express inicia e entrega `public/index.html`.
-- Endpoint de exportação gera um arquivo Microsoft Excel 2007+ válido.
-- XLSX reaberto com acentuação e exatamente sete colunas.
-- Parser de preço brasileiro, embalagem, JSON-LD e imagem testado.
-- Página de categoria sem preço não é salva como produto.
-- Produto sem preço não é contado como extraído com sucesso.
-- CAPTCHA/bloqueio produz estado `blocked`, não `completed`.
-- URL privada/local, protocolo inseguro e navegação SSRF são bloqueados.
-- Cancelamento com `AbortController` preserva os produtos já transmitidos no frontend.
-- Playwright 1.53.2 alinhado ao Chromium 138.0.2.
-- `npm audit --omit=dev`: zero vulnerabilidades conhecidas.
+- 33/33 testes automatizados.
+- Sintaxe aprovada para painel, APIs, content script, service worker e build.
+- ZIP íntegro com `manifest.json`, `content.js`, `service-worker.js` e `popup.html` na raiz.
+- O painel não chama mais `/api/scrape`; “Iniciar” permanece bloqueado sem o coletor.
+- Comunicação aceita somente o painel Cata Preço+ e seus previews.
+- A extensão abre a aba do fornecedor com `active: true` e nunca usa `chrome.tabs.remove()`.
+- Pausa, retomada, cancelamento, recuperação do storage e repetição da mesma página após CAPTCHA/login cobertos por regressão.
+- URL sem protocolo recebe `https://`.
+- Redirecionamento legítimo para `www` atualiza a origem antes da descoberta.
+- MS Atacado ao vivo: 65 cards reconhecidos na primeira página; amostra validada com nomes, preços e imagens reais.
+- Luiz Eletrônicos ao vivo e deslogado: 48 links de produtos, zero preços de produto e link de login; decisão validada como `PAUSAR_PARA_LOGIN`.
+- Valores do rodapé do Luiz Eletrônicos (pedido mínimo de R$ 500, R$ 1.000 e R$ 1.500) não são aceitos como preço de produto.
 
-## Erros encontrados durante a própria validação e corrigidos
+## Pendente antes da produção
 
-1. O curinga `app.get('*')` quebrava a inicialização no Express 5. Substituído por middleware de fallback e coberto por teste.
-2. Dependências com `^` instalaram Playwright 1.62.1, incompatível com o Chromium 138. As versões foram fixadas.
-3. O pacote `xlsx` apresentava vulnerabilidade alta sem correção no npm. Foi substituído por ExcelJS e a auditoria voltou a zero.
-4. ExcelJS trazia uma versão vulnerável de `uuid`. Foi aplicada uma versão segura por `overrides`, com exportação revalidada.
-5. O parser interpretava `R$ 1.234` como 1,234. A regra brasileira de milhar foi adicionada e testada.
-6. As rotas de navegação não validavam cada redirecionamento contra SSRF. Toda navegação agora passa pela validação de URL pública.
+- Carregar o ZIP numa instância de Chrome que permita extensões Manifest V3.
+- Confirmar no painel publicado o estado “Coletor conectado”.
+- Executar MS Atacado pelo fluxo completo painel → extensão → aba → painel.
+- Entrar no Luiz Eletrônicos com uma conta autorizada, clicar em Continuar e confirmar que os preços liberados são coletados.
+- Testar Pausar, Continuar, Cancelar e exportações no fluxo integrado.
 
-## Bloqueios pendentes antes de produção
-
-- O Chromium serverless não inicia neste contêiner porque o sistema de arquivos rejeita `chown` durante a extração dos binários. Isso é uma limitação do ambiente atual; precisa ser testado numa Preview Deployment real da Vercel.
-- O download do navegador de teste do Playwright retornou um arquivo vazio/truncado neste ambiente. Assim, cliques e console ainda não foram aprovados num navegador local real.
-- Nenhum fornecedor real foi informado/autorizado neste novo projeto. O scraping precisa ser testado separadamente em cada site pretendido.
-- CAPTCHA real, infinite scroll específico, paginação e seletores variam por fornecedor e exigem evidência ao vivo.
-
-## Roteiro obrigatório para liberar publicação
-
-1. Criar Preview Deployment na Vercel.
-2. Abrir a página em Chrome, verificar console sem erros e testar responsividade.
-3. Validar campos obrigatórios e URL inválida.
-4. Executar um site de homologação público com JSON-LD e outro com fallbacks CSS.
-5. Confirmar progresso incremental, contagem, cancelamento e preservação parcial.
-6. Executar página controlada com CAPTCHA e confirmar estado `blocked`.
-7. Abrir os arquivos JSON e XLSX e conferir as sete colunas e os valores.
-8. Testar cada fornecedor real autorizado e registrar páginas, produtos esperados e diferenças.
-9. Somente após todos os itens passarem, promover a Preview Deployment para produção.
+Nenhuma versão deve ser descrita como totalmente aprovada enquanto esses itens estiverem pendentes.

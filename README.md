@@ -1,14 +1,24 @@
 # Cata Preço+
 
-Aplicação web para catalogar produtos de sites de fornecedores autorizados, acompanhar o progresso e exportar os resultados em XLSX ou JSON.
+Sistema híbrido para catalogar produtos de fornecedores autorizados. O painel roda na Vercel, enquanto a extensão **Coletor Cata Preço+** abre uma aba real do Chrome, rola as páginas, usa a sessão do usuário e devolve os produtos ao painel para exportação em XLSX ou JSON.
 
 ## Limites honestos
 
-- O projeto não burla CAPTCHA, login, WAF ou mecanismo antirobô. Ao detectar um bloqueio, encerra a execução com estado `blocked` e preserva os produtos já recebidos.
-- A função da Vercel tem limite de tempo, memória e uso mensal. Uma execução percorre no máximo 35 páginas, 500 produtos ou 240 segundos. Para catálogos maiores, execute uma categoria por vez.
-- O cancelamento interrompe a conexão e fecha o navegador assim que o servidor recebe a desconexão. Os itens já transmitidos continuam disponíveis para exportação no navegador.
-- O crawler permanece no mesmo domínio informado e bloqueia IPs locais/privados para evitar SSRF.
+- O projeto não burla CAPTCHA, login, WAF ou mecanismo antirobô. A extensão pausa, mantém a aba aberta e pede intervenção do usuário.
+- A catalogação não depende mais do Chromium invisível da Vercel nem do limite de duração de uma função serverless.
+- A fila, produtos e página atual são persistidos em `chrome.storage.local` para permitir recuperação após suspensão do service worker.
+- O coletor permanece no mesmo domínio do fornecedor e só aceita comandos vindos do painel Cata Preço+.
 - Respeite os termos do fornecedor, `robots.txt`, direitos autorais e legislação aplicável.
+
+## Instalar o coletor
+
+1. Abra o painel e clique em **Baixar coletor**.
+2. Extraia o ZIP completamente.
+3. Abra `chrome://extensions`.
+4. Ative **Modo do desenvolvedor**.
+5. Clique em **Carregar sem compactação**.
+6. Selecione a pasta extraída que contém `manifest.json`. Não selecione o arquivo ZIP nem uma pasta acima dela.
+7. Recarregue o painel. O estado precisa mudar para **Coletor conectado** antes de liberar “Iniciar pesquisa”.
 
 ## Executar localmente
 
@@ -50,10 +60,10 @@ Se qualquer item não puder ser executado, a entrega deve dizer **não validado*
 
 ## Estrutura
 
-- `public/index.html`: interface e cliente de streaming.
-- `api/scrape.js`: função Node.js/Playwright.
+- `public/index.html`: painel e ponte de comunicação com a extensão.
+- `extension/`: extensão Chrome Manifest V3, coletor DOM e fila persistente.
+- `public/downloads/coletor-cata-preco-plus.zip`: pacote instalável gerado por `npm run build:extension`.
 - `api/export.js`: exportação XLSX segura com ExcelJS.
-- `lib/`: segurança, parser e crawler testáveis.
-- `tests/`: regressões de preço, produto/categoria, CAPTCHA e SSRF.
+- `tests/`: regressões do painel, extensão, preços, CAPTCHA, fila e exportação.
 
-Referências: [Vercel Functions](https://vercel.com/docs/functions), [Streaming](https://vercel.com/docs/functions/streaming-functions), [@sparticuz/chromium](https://github.com/Sparticuz/chromium).
+Referências: [Chrome Tabs API](https://developer.chrome.com/docs/extensions/reference/api/tabs), [Chrome Content Scripts](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts), [Vercel](https://vercel.com/docs).

@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Coletor Cata Preço+",
+  "version": "1.1.0",
+  "description": "Abre fornecedores em uma aba visível e envia os produtos ao painel Cata Preço+.",
+  "permissions": ["tabs", "scripting", "storage", "windows"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "service-worker.js" },
+  "action": {
+    "default_title": "Coletor Cata Preço+",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
