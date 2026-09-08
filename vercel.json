@@ -8,7 +8,10 @@
     }
   },
   "rewrites": [
-    { "source": "/", "destination": "/public/index.html" }
+    { "source": "/", "destination": "/public/index.html" },
+    { "source": "/coletor-shopee", "destination": "/public/coletor-shopee/index.html" },
+    { "source": "/coletor-shopee/", "destination": "/public/coletor-shopee/index.html" },
+    { "source": "/coletor-shopee/:path*", "destination": "/public/coletor-shopee/:path*" }
   ],
   "headers": [
     {
@@ -16,6 +19,13 @@
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/coletor-shopee/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/coletor-shopee/" }
       ]
     }
   ]
