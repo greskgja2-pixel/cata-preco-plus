@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<link rel="manifest" href="/coletor-shopee/manifest.webmanifest">
+<link rel="icon" href="/coletor-shopee/icon.svg">
+<title>Coletor Shopee Mobile</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif;background:#07131f;color:#eef7ff}*{box-sizing:border-box}body{margin:0;background:#07131f}.app{max-width:760px;margin:auto;min-height:100vh}.top{position:sticky;top:0;z-index:3;background:#07131fee;backdrop-filter:blur(12px);padding:16px;border-bottom:1px solid #173247;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;font-size:20px}.small{font-size:12px;color:#7892a8}.content{padding:16px}.card{background:#0d1d2b;border:1px solid #18384e;border-radius:16px;padding:16px;margin-bottom:12px}.status{font-size:27px;font-weight:900}.muted{color:#a8bfd2;line-height:1.45}.warn{background:#382b12;border-color:#77591c;color:#f1c86a}.error{color:#ff9da3;white-space:pre-wrap}.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:12px;background:#ff5a2a;color:#fff;font-weight:900;padding:12px 14px;cursor:pointer}.btn.alt{background:#183148}.btn.bad{background:#7d2930}.btn:disabled{opacity:.45}.input{width:100%;background:#102231;border:1px solid #244359;color:#fff;border-radius:12px;padding:13px 14px;margin:8px 0}.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #173247}.tab{background:none;border:0;color:#bdd0df;padding:13px;font-weight:800}.tab.active{color:#fff;border-bottom:2px solid #ff5a2a}.metric{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.metric b{font-size:26px}.item h3{margin:0 0 6px;font-size:15px}.badge{display:inline-block;border:1px solid #29475b;border-radius:999px;padding:3px 8px;font-size:11px;color:#b9cbd8;margin:4px 4px 0 0}.hide{display:none!important}.footer{padding:16px;color:#6f8799;font-size:12px;text-align:center}.ok{color:#85e6b5}.notice{font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div><div class="brand">Coletor Shopee Mobile</div><div id="who" class="small">PWA do Painel de Revenda</div></div><button id="logout" class="btn alt hide">Sair</button></header>
+<section id="login" class="content"><div class="card"><div class="status">Entrar</div><p class="muted">Use a mesma conta do Painel de Revenda.</p><input id="email" class="input" type="email" autocomplete="username" placeholder="E-mail"><input id="password" class="input" type="password" autocomplete="current-password" placeholder="Senha"><button id="loginBtn" class="btn">Entrar</button><p id="loginError" class="error"></p></div></section>
+<main id="main" class="hide">
+<nav class="tabs"><button class="tab active" data-tab="inicio">Início</button><button class="tab" data-tab="fila">Fila</button><button class="tab" data-tab="historico">Histórico</button></nav>
+<section id="inicio" class="content tabpage">
+<div class="card"><div class="status">Conectado</div><p class="muted">Esta PWA acompanha a fila real do Painel de Revenda. A coleta automática completa da Shopee é feita pelo app Android.</p><div class="metric"><div><b id="mPending">0</b><div class="small">pendentes</div></div><div><b id="mRunning">0</b><div class="small">em execução</div></div><div><b id="mError">0</b><div class="small">com erro</div></div></div><div class="row" style="margin-top:16px"><button id="refresh" class="btn">Atualizar</button><button id="install" class="btn alt hide">Instalar PWA</button></div><div id="syncState" class="notice muted"></div></div>
+<div class="card warn"><b>Coleta no celular</b><p>Por segurança do navegador, uma PWA não consegue ler o conteúdo de uma aba da Shopee. O aplicativo Android abre a Shopee em um navegador interno e consegue executar a coleta, rolagem e envio ao Painel.</p></div>
+</section>
+<section id="fila" class="content tabpage hide"><div id="jobs"></div></section>
+<section id="historico" class="content tabpage hide"><div id="history"></div></section>
+</main>
+<div class="footer">Coletor Shopee Mobile · Painel de Revenda</div>
+</div>
+<script>
+const SB='https://czlshkesifmyttravklg.supabase.co';
+const KEY='sb_publishable_DZmnKRsd_TrhFg09HQkp2Q_M64xh2un';
+let session=null,jobs=[],collections=[],installPrompt=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function save(){session?localStorage.setItem('pr-pwa-session',JSON.stringify(session)):localStorage.removeItem('pr-pwa-session')}
+function headers(extra={}){return {'apikey':KEY,'Authorization':`Bearer ${session?.access_token||''}`,'Content-Type':'application/json',...extra}}
+async function refreshToken(){if(!session?.refresh_token)return false;const r=await fetch(`${SB}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh_token})});if(!r.ok)return false;session=await r.json();save();return true}
+async function authFetch(url,opt={}){let r=await fetch(url,{...opt,headers:headers(opt.headers||{})});if(r.status===401&&await refreshToken())r=await fetch(url,{...opt,headers:headers(opt.headers||{})});if(r.status===401){session=null;save();location.reload()}return r}
+async function login(){$('loginError').textContent='';$('loginBtn').disabled=true;try{const r=await fetch(`${SB}/auth/v1/token?grant_type=password`,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})});const d=await r.json();if(!r.ok)throw new Error(d.error_description||d.msg||d.message||'Falha no login');session=d;save();showApp();await refresh()}catch(e){$('loginError').textContent=e.message}finally{$('loginBtn').disabled=false}}
+function logout(){session=null;save();location.reload()}
+function showApp(){if(!session)return;$('login').classList.add('hide');$('main').classList.remove('hide');$('logout').classList.remove('hide');$('who').textContent=session.user?.email||'Conta conectada'}
+async function rest(path,opt={}){const r=await authFetch(`${SB}/rest/v1/${path}`,opt);if(!r.ok)throw new Error(await r.text()||`HTTP ${r.status}`);if(r.status===204)return null;return r.json()}
+async function refresh(){try{$('syncState').textContent='Atualizando…';[jobs,collections]=await Promise.all([rest('revenda_market_jobs?select=*&order=priority.desc,created_at.asc&limit=100'),rest('revenda_market_collections?select=*&order=collected_at.desc&limit=60')]);render();$('syncState').textContent='Sincronizado agora';$('syncState').className='notice ok'}catch(e){$('syncState').textContent='Erro ao sincronizar: '+e.message;$('syncState').className='notice error'}}
+function searchUrl(q,sort='relevancy'){return `https://shopee.com.br/search?keyword=${encodeURIComponent(q||'')}&page=0&sortBy=${sort==='sales'?'sales':'relevancy'}`}
+async function patchJob(id,body){await rest(`revenda_market_jobs?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({...body,updated_at:new Date().toISOString()})});await refresh()}
+function render(){$('mPending').textContent=jobs.filter(x=>x.status==='pending').length;$('mRunning').textContent=jobs.filter(x=>x.status==='running').length;$('mError').textContent=jobs.filter(x=>x.status==='error').length;
+$('jobs').innerHTML=jobs.length?jobs.map(j=>`<article class="card item"><h3>${esc(j.product_name)}</h3><span class="badge">${esc(j.status)}</span><span class="badge">${j.pages_requested||3} páginas</span><span class="badge">tentativa ${j.attempts||0}</span>${j.last_error?`<p class="error">${esc(j.last_error)}</p>`:''}<div class="row" style="margin-top:10px"><button class="btn alt" onclick="openShopee('${encodeURIComponent(j.id)}')">Abrir Shopee</button>${['error','cancelled'].includes(j.status)?`<button class="btn" onclick="retry('${encodeURIComponent(j.id)}')">Tentar novamente</button>`:''}${j.status==='pending'?`<button class="btn bad" onclick="cancelJobPwa('${encodeURIComponent(j.id)}')">Cancelar</button>`:''}</div></article>`).join(''):'<div class="card muted">Fila vazia.</div>';
+$('history').innerHTML=collections.length?collections.map(c=>`<article class="card item"><h3>${esc(c.query)}</h3><span class="badge">${c.total_items||0} anúncios</span><span class="badge">${c.pages_collected||0} páginas</span><p class="small">${new Date(c.collected_at).toLocaleString('pt-BR')}</p></article>`).join(''):'<div class="card muted">Nenhuma coleta concluída ainda.</div>'}
+window.openShopee=id=>{const j=jobs.find(x=>x.id===decodeURIComponent(id));if(j)window.open(searchUrl(j.product_name,j.sort_by),'_blank','noopener')};
+window.retry=id=>patchJob(decodeURIComponent(id),{status:'pending',next_attempt_at:null,last_error:null});
+window.cancelJobPwa=id=>patchJob(decodeURIComponent(id),{status:'cancelled'});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tabpage').forEach(x=>x.classList.add('hide'));$(b.dataset.tab).classList.remove('hide')});
+$('loginBtn').onclick=login;$('logout').onclick=logout;$('refresh').onclick=refresh;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').classList.remove('hide')});$('install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;$('install').classList.add('hide')}};
+try{session=JSON.parse(localStorage.getItem('pr-pwa-session')||'null')}catch{}if(session){showApp();refresh()}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('/coletor-shopee/sw.js',{scope:'/coletor-shopee/'}).catch(()=>{});
+</script>
+</body>
+</html>
